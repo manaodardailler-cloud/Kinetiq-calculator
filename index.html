@@ -40,11 +40,151 @@
       url("mnt.jpeg") center / cover no-repeat;
     background-attachment: fixed;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     color: var(--text);
-    padding: 28px 18px;
+    padding: 32px 18px 140px;
     overflow-x: hidden;
+  }
+
+  .layout {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 32px;
+    width: min(980px, 100%);
+  }
+
+  .side-panel {
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .panel {
+    background: rgba(5, 10, 24, 0.7);
+    border-radius: 20px;
+    padding: 20px 18px;
+    box-shadow:
+      0 24px 60px rgba(1, 5, 20, 0.55),
+      inset 0 0 0 1px var(--stroke);
+    flex: 1;
+  }
+
+  .leaderboard {
+    width: auto;
+  }
+
+  .leaderboard h3,
+  .break-even h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .break-even .actions {
+    margin-top: 16px;
+  }
+
+  .podium {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+
+  .podium-slot {
+    background: rgba(2, 6, 23, 0.6);
+    border-radius: 14px;
+    padding: 10px 8px;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+  }
+
+  .podium-slot .rank {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(226, 232, 240, 0.6);
+  }
+
+  .podium-slot .name {
+    font-weight: 700;
+    margin: 6px 0 2px;
+  }
+
+  .podium-slot .score {
+    font-size: 12px;
+    color: var(--result);
+  }
+
+  .podium-slot.first {
+    min-height: 110px;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(59, 130, 246, 0.25));
+    box-shadow: 0 12px 26px rgba(34, 211, 238, 0.25);
+  }
+
+  .podium-slot.second {
+    min-height: 92px;
+  }
+
+  .podium-slot.third {
+    min-height: 84px;
+  }
+
+  .leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+  }
+
+  .leaderboard-item + .leaderboard-item {
+    margin-top: 10px;
+  }
+
+  .leaderboard-item .rank-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.25);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .leaderboard-name {
+    font-weight: 600;
+  }
+
+  .leaderboard input {
+    width: 96px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(2, 6, 23, 0.9);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+    text-align: right;
+    font-size: 13px;
+  }
+
+  .leaderboard input:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--accent);
   }
 
   .bg-orbs {
@@ -202,11 +342,13 @@
   .card {
     position: relative;
     z-index: 2;
-    width: min(480px, 100%);
+    width: min(460px, 100%);
+    margin-top: 48px;
+    align-self: center;
     background: var(--card);
     backdrop-filter: blur(16px);
     border-radius: 24px;
-    padding: 26px 28px 30px;
+    padding: 22px 24px 24px;
     box-shadow:
       0 30px 80px rgba(1, 5, 20, 0.72),
       inset 0 0 0 1px var(--stroke);
@@ -254,7 +396,69 @@
   }
 
   .field {
-    margin-top: 14px;
+    margin-top: 12px;
+  }
+
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .range-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 1px;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, hsl(var(--h, 190) 85% 62%), hsl(calc(var(--h, 190) + 35) 85% 62%)) 0 0 / var(--p, 0%) 100% no-repeat,
+      linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.12));
+    outline: none;
+    box-shadow: none;
+  }
+
+  .range-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(224, 242, 254, 0.85);
+    border: 1px solid rgba(34, 211, 238, 0.6);
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.55),
+      0 3px 8px rgba(34, 211, 238, 0.2);
+    cursor: pointer;
+  }
+
+  .range-row input[type="range"]::-moz-range-thumb {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(224, 242, 254, 0.85);
+    border: 1px solid rgba(34, 211, 238, 0.6);
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.55),
+      0 3px 8px rgba(34, 211, 238, 0.2);
+    cursor: pointer;
+  }
+
+  .range-row input[type="range"]::-moz-range-track {
+    height: 1px;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, hsl(var(--h, 190) 85% 62%), hsl(calc(var(--h, 190) + 35) 85% 62%)) 0 0 / var(--p, 0%) 100% no-repeat,
+      linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.12));
+    box-shadow: none;
+  }
+
+  .range-value {
+    min-width: 54px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
   }
 
   label {
@@ -497,6 +701,15 @@
   }
 
   @media (max-width: 520px) {
+    .layout {
+      align-items: stretch;
+    }
+
+    .side-panel {
+      width: 100%;
+      flex-direction: column;
+    }
+
     .card {
       padding: 22px 20px 26px;
       border-radius: 20px;
@@ -524,7 +737,38 @@
 <div class="flyer-field" id="flyerField" aria-hidden="true"></div>
 <div class="confetti-field" id="confettiField" aria-hidden="true"></div>
 <div class="flash" id="flash" aria-hidden="true"></div>
-<div class="card">
+<div class="layout">
+  <div class="side-panel">
+    <aside class="leaderboard panel">
+      <h3>Classement Kpoints</h3>
+      <div class="podium" id="podium"></div>
+      <div id="leaderboardList"></div>
+      <div class="actions">
+        <button type="button" class="ghost" id="saveLeaderboard">Enregistrer</button>
+      </div>
+    </aside>
+
+    <section class="break-even panel">
+      <h3>Seuil de rentabilité</h3>
+      <div class="field" style="margin-top: 0;">
+        <label for="fees">Frais dépensés ($)</label>
+        <input type="number" id="fees" inputmode="decimal" placeholder="250">
+      </div>
+
+      <div class="field">
+        <label for="pointsBreak">Nombre de points</label>
+        <input type="number" id="pointsBreak" inputmode="decimal" placeholder="50000">
+      </div>
+
+      <div class="actions">
+        <button type="button" onclick="calculerRentabilite()">Calculer seuil</button>
+      </div>
+
+      <div class="result" id="breakEvenResult" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div class="card">
   <div class="title">
     <div class="title-badge">KQ</div>
     <h2>Calculateur de valeur Kinetiq</h2>
@@ -534,25 +778,37 @@
   <div class="field">
     <label for="weeks">Nombre de semaines</label>
     <input type="number" id="weeks" inputmode="numeric" placeholder="12">
-    <div class="hint">Durée du programme en semaines.</div>
+    <div class="range-row">
+      <input type="range" id="weeksRange" min="14" max="32" step="1" value="14">
+      <div class="range-value" id="weeksRangeValue">14</div>
+    </div>
   </div>
 
   <div class="field">
     <label for="airdropPercent">Pourcentage d’airdrop</label>
     <input type="number" id="airdropPercent" inputmode="decimal" placeholder="5">
-    <div class="hint">Ex: 5 pour 5%.</div>
+    <div class="range-row">
+      <input type="range" id="airdropRange" min="5" max="20" step="0.5" value="5">
+      <div class="range-value" id="airdropRangeValue">5</div>
+    </div>
   </div>
 
   <div class="field">
     <label for="fdv">FDV à l’airdrop (en millions)</label>
     <input type="number" id="fdv" inputmode="decimal" placeholder="150">
-    <div class="hint">Valorisation fully diluted en M.</div>
+    <div class="range-row">
+      <input type="range" id="fdvRange" min="50" max="500" step="10" value="150">
+      <div class="range-value" id="fdvRangeValue">150</div>
+    </div>
   </div>
 
   <div class="field">
     <label for="points">Nombre de points</label>
     <input type="number" id="points" inputmode="decimal" placeholder="30000">
-    <div class="hint">Nombre total de points gagnés.</div>
+    <div class="range-row">
+      <input type="range" id="pointsRange" min="0" max="20000" step="100" value="0">
+      <div class="range-value" id="pointsRangeValue">0</div>
+    </div>
   </div>
 
   <div class="actions">
@@ -588,9 +844,130 @@
       input.classList.toggle("input-error", isInvalid);
     }
 
+    function bindRangePair(numberId, rangeId, valueId, suffix = "") {
+      const numberInput = document.getElementById(numberId);
+      const rangeInput = document.getElementById(rangeId);
+      const valueEl = document.getElementById(valueId);
+      const min = parseFloat(rangeInput.min);
+      const max = parseFloat(rangeInput.max);
+
+      function setValue(val) {
+        const value = String(val);
+        numberInput.value = value;
+        rangeInput.value = value;
+        valueEl.textContent = value + suffix;
+        const num = parseFloat(value);
+        const pct = Number.isFinite(num) ? ((num - min) / (max - min)) * 100 : 0;
+        const clamped = Math.min(Math.max(pct, 0), 100);
+        rangeInput.style.setProperty("--p", `${clamped}%`);
+        rangeInput.style.setProperty("--h", `${190 + clamped * 0.7}`);
+      }
+
+      rangeInput.addEventListener("input", () => {
+        setValue(rangeInput.value);
+      });
+
+      numberInput.addEventListener("input", () => {
+        if (numberInput.value === "") return;
+        setValue(numberInput.value);
+      });
+
+      setValue(rangeInput.value);
+    }
+
     const particleField = document.getElementById("particleField");
     const confettiField = document.getElementById("confettiField");
     const flash = document.getElementById("flash");
+    const podium = document.getElementById("podium");
+    const leaderboardList = document.getElementById("leaderboardList");
+
+    const participants = [
+      { name: "zark", points: 1200 },
+      { name: "noob to mil", points: 6000 },
+      { name: "brokx", points: 7000 },
+      { name: "farodo", points: 1200 }
+    ];
+
+    const rowMap = new Map();
+    const saveLeaderboard = document.getElementById("saveLeaderboard");
+
+    bindRangePair("weeks", "weeksRange", "weeksRangeValue");
+    bindRangePair("airdropPercent", "airdropRange", "airdropRangeValue");
+    bindRangePair("fdv", "fdvRange", "fdvRangeValue");
+    bindRangePair("points", "pointsRange", "pointsRangeValue");
+
+    function updatePodium(sorted) {
+      podium.innerHTML = "";
+      const podiumOrder = [
+        { rank: 2, className: "second" },
+        { rank: 1, className: "first" },
+        { rank: 3, className: "third" }
+      ];
+      const podiumIcons = {
+        1: "🏆",
+        2: "🥈",
+        3: "🥉"
+      };
+
+      podiumOrder.forEach((slot) => {
+        const person = sorted[slot.rank - 1];
+        const card = document.createElement("div");
+        card.className = `podium-slot ${slot.className}`;
+        card.innerHTML = `
+          <div class="rank">${podiumIcons[slot.rank]} #${slot.rank}</div>
+          <div class="name">${person ? person.name : "-"}</div>
+          <div class="score">${person ? person.points : 0} KP</div>
+        `;
+        podium.appendChild(card);
+      });
+    }
+
+    function buildLeaderboard() {
+      participants.forEach((person) => {
+        const row = document.createElement("div");
+        row.className = "leaderboard-item";
+        row.innerHTML = `
+          <div class="rank-badge">-</div>
+          <div class="leaderboard-name">${person.name}</div>
+          <input type="number" value="${person.points}" inputmode="numeric" data-name="${person.name}">
+        `;
+        rowMap.set(person.name, row);
+        leaderboardList.appendChild(row);
+      });
+    }
+
+    function updateLeaderboardView(activeInput = null) {
+      const sorted = [...participants].sort((a, b) => b.points - a.points);
+      updatePodium(sorted);
+
+      const listIcons = ["🏆", "🥈", "🥉"];
+      sorted.forEach((person, index) => {
+        const row = rowMap.get(person.name);
+        if (!row) return;
+        const badge = row.querySelector(".rank-badge");
+        if (badge) badge.textContent = listIcons[index] || String(index + 1);
+        const input = row.querySelector("input");
+        if (input && input !== activeInput) input.value = person.points;
+        leaderboardList.appendChild(row);
+      });
+    }
+
+    buildLeaderboard();
+    updateLeaderboardView();
+
+    function applyLeaderboardChanges() {
+      rowMap.forEach((row, name) => {
+        const input = row.querySelector("input");
+        const value = parseNumber(input ? input.value : "");
+        const participant = participants.find((p) => p.name === name);
+        if (participant) participant.points = Number.isFinite(value) ? value : participant.points;
+      });
+      updateLeaderboardView();
+    }
+
+    saveLeaderboard.addEventListener("click", () => {
+      applyLeaderboardChanges();
+    });
 
     function spawnParticles(x, y) {
       for (let i = 0; i < 22; i += 1) {
@@ -707,6 +1084,27 @@
       }
     }
 
+    function calculerRentabilite() {
+      const inputFees = document.getElementById("fees");
+      const inputPointsBreak = document.getElementById("pointsBreak");
+      const fees = parseNumber(inputFees.value);
+      const points = parseNumber(inputPointsBreak.value);
+
+      markInvalid(inputFees, !fees);
+      markInvalid(inputPointsBreak, !points);
+
+      const result = document.getElementById("breakEvenResult");
+      if (!fees || !points) {
+        result.innerText = "Merci de remplir les deux champs.";
+        result.classList.add("visible");
+        return;
+      }
+
+      const valuePerPoint = fees / points;
+      result.innerText = "Valeur minimale d’un point : " + formatUsd(valuePerPoint);
+      result.classList.add("visible");
+    }
+
     function reinitialiser() {
       document.getElementById("weeks").value = "";
       document.getElementById("airdropPercent").value = "";
@@ -785,5 +1183,7 @@
     window.setInterval(spawnFlyer, 7000);
   </script>
   </div>
+</div>
 </body>
 </html>
+
