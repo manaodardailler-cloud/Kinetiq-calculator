@@ -1,196 +1,789 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calculateur Points Kinetiq</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
   <style>
-    * { box-sizing: border-box; }
+  :root {
+    color-scheme: dark;
+    --bg-1: #071224;
+    --bg-2: #020617;
+    --card: rgba(5, 10, 24, 0.74);
+    --stroke: rgba(148, 163, 184, 0.18);
+    --text: #e5e7eb;
+    --muted: #cbd5f5;
+    --accent: #3b82f6;
+    --accent-2: #22d3ee;
+    --warning: #f87171;
+    --result: #bae6fd;
+  }
 
-    :root{
-      --bg1: rgba(2, 6, 23, 0.78);
-      --bg2: rgba(2, 6, 23, 0.92);
-      --card: rgba(2, 6, 23, 0.72);
-      --stroke: rgba(148, 163, 184, 0.14);
-      --text: #e5e7eb;
-      --muted: #cbd5f5;
-      --accent: #6366f1;
-      --accent2: #8b5cf6;
-      --result: #a5b4fc;
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(1200px 700px at 20% 10%, rgba(34, 211, 238, 0.12), transparent 55%),
+      radial-gradient(900px 500px at 80% 0%, rgba(59, 130, 246, 0.14), transparent 50%),
+      linear-gradient(135deg, rgba(2, 6, 23, 0.78), rgba(2, 6, 23, 0.72)),
+      url("mnt.jpeg") center / cover no-repeat;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    padding: 28px 18px;
+    overflow-x: hidden;
+  }
+
+  .bg-orbs {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    --x: 50%;
+    --y: 50%;
+  }
+
+  .bg-orbs .orb {
+    animation: orb-drift 16s ease-in-out infinite alternate;
+  }
+
+  .bg-orbs .orb.orb-2 {
+    animation-duration: 20s;
+  }
+
+  .bg-orbs .orb.orb-3 {
+    animation-duration: 18s;
+  }
+
+  @keyframes orb-drift {
+    0% {
+      transform: translate(-50%, -50%) translateX(-2%) translateY(0);
     }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-
-      /* L'image de montagnes (mets "mountains.jpg" dans le même dossier) */
-      background-image: url("mountain.jpeg");
-      background-size: 120% auto;            /* un peu plus large pour éviter les bords pendant l’anim */
-      background-position: 50% 50%;
-      background-repeat: no-repeat;
-
-      /* Animation de "pan" (déplacement horizontal) */
-      animation: bg-pan 28s ease-in-out infinite alternate;
-
-      /* Centrage */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      position: relative;
-      overflow: hidden;
-      padding: 24px;
+    100% {
+      transform: translate(-50%, -50%) translateX(2.5%) translateY(-1.5%);
     }
+  }
 
-    /* Déplacement doux du background via background-position [web:30][web:50] */
-    @keyframes bg-pan {
-      0%   { background-position: 40% 50%; }
-      100% { background-position: 60% 50%; }
+  .waves {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(900px 400px at 20% 80%, rgba(56, 189, 248, 0.15), transparent 65%),
+      radial-gradient(700px 320px at 70% 85%, rgba(14, 165, 233, 0.12), transparent 60%);
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    animation: waves-drift 18s ease-in-out infinite alternate;
+  }
+
+  .cursor-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.75;
+    background: radial-gradient(220px 220px at var(--mx, 50%) var(--my, 50%), rgba(34, 211, 238, 0.22), transparent 70%);
+    mix-blend-mode: screen;
+    transition: opacity 0.3s ease;
+  }
+
+  @keyframes waves-drift {
+    0% {
+      transform: translateX(-2%) translateY(0);
     }
-
-    /* Accessibilité : si l’utilisateur préfère moins d’animation, on coupe [web:46][web:54] */
-    @media (prefers-reduced-motion: reduce) {
-      body { animation: none; }
-      .bg-overlay { animation: none; }
+    100% {
+      transform: translateX(2.5%) translateY(-1.5%);
     }
+  }
 
-    /* Voile sombre + léger glow */
-    .bg-overlay {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(1200px 600px at 50% 20%, rgba(99, 102, 241, 0.18), transparent 60%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      z-index: 0;
+  .orb {
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    border-radius: 999px;
+    filter: blur(10px);
+    opacity: 0.65;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s ease, left 0.2s ease, top 0.2s ease;
+    mix-blend-mode: screen;
+  }
+
+  .orb.orb-1 {
+    left: 45%;
+    top: 35%;
+    background: radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.8), rgba(59, 130, 246, 0.05) 60%);
+  }
+
+  .orb.orb-2 {
+    left: 70%;
+    top: 25%;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.7), rgba(15, 23, 42, 0.05) 60%);
+  }
+
+  .orb.orb-3 {
+    left: 30%;
+    top: 70%;
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.6), rgba(2, 6, 23, 0.05) 65%);
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .token-field {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .token {
+    position: absolute;
+    top: -60px;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: url("kntq-64.webp") center / cover no-repeat;
+    box-shadow: 0 10px 30px rgba(34, 211, 238, 0.28);
+    opacity: 0.9;
+    transform: translateX(0) rotate(0deg);
+    animation: token-fall var(--duration) linear forwards;
+  }
+
+  .token::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  @keyframes token-fall {
+    0% {
+      transform: translateX(var(--drift)) translateY(-60px) rotate(0deg);
+      opacity: 0;
     }
+    10% {
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(calc(var(--drift) * 1.4)) translateY(120vh) rotate(360deg);
+      opacity: 0.15;
+    }
+  }
 
+  .card {
+    position: relative;
+    z-index: 2;
+    width: min(480px, 100%);
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    padding: 26px 28px 30px;
+    box-shadow:
+      0 30px 80px rgba(1, 5, 20, 0.72),
+      inset 0 0 0 1px var(--stroke);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card.result-glow {
+    box-shadow:
+      0 30px 80px rgba(1, 5, 20, 0.72),
+      inset 0 0 0 1px rgba(34, 211, 238, 0.45),
+      0 0 45px rgba(34, 211, 238, 0.35);
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .title-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(34, 211, 238, 0.6));
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #030712;
+    box-shadow: 0 12px 24px rgba(34, 211, 238, 0.2);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+  }
+
+  .subtitle {
+    margin: 0 0 18px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .field {
+    margin-top: 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(226, 232, 240, 0.6);
+  }
+
+  input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(2, 6, 23, 0.9);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  input:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--accent);
+    transform: translateY(-1px);
+  }
+
+  input.input-error {
+    box-shadow: inset 0 0 0 1px var(--warning);
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  button {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #021024;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(34, 211, 238, 0.28);
+  }
+
+  .ghost {
+    background: rgba(15, 23, 42, 0.7);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+  }
+
+  .result {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.65);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--result);
+    min-height: 24px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .result.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .result-pulse {
+    animation: result-pulse 0.7s ease;
+  }
+
+  @keyframes result-pulse {
+    0% {
+      transform: scale(0.98);
+    }
+    60% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .focus-dim .bg-orbs,
+  .focus-dim .token-field,
+  .focus-dim .noise {
+    filter: saturate(0.75) brightness(0.85);
+    opacity: 0.7;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  .particle-field {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.95), rgba(59, 130, 246, 0.2));
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+    animation: particle-burst 900ms ease-out forwards;
+  }
+
+  .confetti-field {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 6px;
+    border-radius: 2px;
+    opacity: 0.95;
+    transform: translateY(-20px) rotate(0deg);
+    animation: confetti-fall var(--duration) ease-in forwards;
+  }
+
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-20px) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(120vh) rotate(540deg);
+      opacity: 0.6;
+    }
+  }
+
+  .flash {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35), transparent 60%);
+    opacity: 0;
+  }
+
+  .flash.active {
+    animation: flash-pop 500ms ease-out;
+  }
+
+  @keyframes flash-pop {
+    0% {
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.75;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .card.shake {
+    animation: card-shake 350ms ease;
+  }
+
+  @keyframes card-shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+  }
+  .flyer-field {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .flyer {
+    position: absolute;
+    top: 12%;
+    width: 64px;
+    height: 64px;
+    background: url("jic.webp") center / contain no-repeat;
+    opacity: 0.9;
+    filter: drop-shadow(0 8px 16px rgba(14, 165, 233, 0.35));
+    animation: flyer-pass var(--duration) linear forwards;
+  }
+
+  @keyframes flyer-pass {
+    0% {
+      transform: translateX(-15vw) translateY(var(--offset)) rotate(-6deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.95;
+    }
+    100% {
+      transform: translateX(115vw) translateY(calc(var(--offset) * -0.35)) rotate(6deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes particle-burst {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--dx), var(--dy)) scale(0.2);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 520px) {
     .card {
-      position: relative;
-      z-index: 1;
-
-      width: min(420px, calc(100vw - 48px));
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-
-      border-radius: 16px;
-      padding: 24px 28px 30px;
-
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      border: 1px solid var(--stroke);
+      padding: 22px 20px 26px;
+      border-radius: 20px;
     }
 
-    h2 {
-      margin: 0 0 20px;
-      text-align: center;
-      font-weight: 650;
-      letter-spacing: 0.2px;
+    .actions {
+      flex-direction: column;
     }
-
-    label {
-      display: block;
-      margin-top: 14px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    input {
-      width: 100%;
-      margin-top: 6px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: none;
-      background: rgba(2, 6, 23, 0.75);
-      color: var(--text);
-      box-shadow: inset 0 0 0 1px #1e293b;
-    }
-
-    input:focus {
-      outline: none;
-      box-shadow: inset 0 0 0 1px var(--accent);
-    }
-
-    button {
-      margin-top: 22px;
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: white;
-      font-size: 15px;
-      font-weight: 650;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
-    }
-
-    .result {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 550;
-      color: var(--result);
-      min-height: 22px;
-    }
+  }
   </style>
+
 </head>
 
 <body>
-  <div class="bg-overlay"></div>
-
-  <div class="card">
+<div class="bg-orbs" id="bgOrbs" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="waves" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="token-field" id="tokenField" aria-hidden="true"></div>
+<div class="particle-field" id="particleField" aria-hidden="true"></div>
+<div class="flyer-field" id="flyerField" aria-hidden="true"></div>
+<div class="confetti-field" id="confettiField" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="card">
+  <div class="title">
+    <div class="title-badge">KQ</div>
     <h2>Calculateur de valeur Kinetiq</h2>
+  </div>
+  <p class="subtitle">Estime la valeur de ton airdrop en 10 secondes.</p>
 
-    <!-- Enlevé (A) (B) (C) (D) -->
-    <label>
-      Nombre de semaines
-      <input type="number" id="weeks" inputmode="numeric" />
-    </label>
-
-    <label>
-      Pourcentage d’airdrop
-      <input type="number" id="airdropPercent" inputmode="decimal" />
-    </label>
-
-    <label>
-      FDV à l’airdrop (en millions)
-      <input type="number" id="fdv" inputmode="decimal" />
-    </label>
-
-    <label>
-      Nombre de points
-      <input type="number" id="points" inputmode="decimal" />
-    </label>
-
-    <button onclick="calculer()">Calculer</button>
-    <div class="result" id="result"></div>
+  <div class="field">
+    <label for="weeks">Nombre de semaines</label>
+    <input type="number" id="weeks" inputmode="numeric" placeholder="12">
+    <div class="hint">Durée du programme en semaines.</div>
   </div>
 
+  <div class="field">
+    <label for="airdropPercent">Pourcentage d’airdrop</label>
+    <input type="number" id="airdropPercent" inputmode="decimal" placeholder="5">
+    <div class="hint">Ex: 5 pour 5%.</div>
+  </div>
+
+  <div class="field">
+    <label for="fdv">FDV à l’airdrop (en millions)</label>
+    <input type="number" id="fdv" inputmode="decimal" placeholder="150">
+    <div class="hint">Valorisation fully diluted en M.</div>
+  </div>
+
+  <div class="field">
+    <label for="points">Nombre de points</label>
+    <input type="number" id="points" inputmode="decimal" placeholder="30000">
+    <div class="hint">Nombre total de points gagnés.</div>
+  </div>
+
+  <div class="actions">
+    <button type="button" onclick="calculer(event)">Calculer</button>
+    <button type="button" class="ghost" onclick="reinitialiser()">Réinitialiser</button>
+  </div>
+
+  <div class="result" id="result" aria-live="polite"></div>
+
   <script>
-    function calculer() {
-      const A = parseFloat(document.getElementById("weeks").value);
-      const B = parseFloat(document.getElementById("airdropPercent").value);
-      const C = parseFloat(document.getElementById("fdv").value);
-      const D = parseFloat(document.getElementById("points").value);
+    function parseNumber(value) {
+      if (!value) return NaN;
+      return parseFloat(String(value).replace(",", "."));
+    }
+
+    function setResult(message) {
+      const result = document.getElementById("result");
+      result.innerText = message;
+      result.classList.toggle("visible", Boolean(message));
+      result.classList.remove("result-pulse");
+      void result.offsetWidth;
+      if (message) {
+        result.classList.add("result-pulse");
+      }
+      const card = document.querySelector(".card");
+      if (message) {
+        card.classList.add("result-glow");
+        window.setTimeout(() => card.classList.remove("result-glow"), 700);
+      }
+    }
+
+    function markInvalid(input, isInvalid) {
+      input.classList.toggle("input-error", isInvalid);
+    }
+
+    const particleField = document.getElementById("particleField");
+    const confettiField = document.getElementById("confettiField");
+    const flash = document.getElementById("flash");
+
+    function spawnParticles(x, y) {
+      for (let i = 0; i < 22; i += 1) {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 80;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.setProperty("--dx", `${dx}px`);
+        particle.style.setProperty("--dy", `${dy}px`);
+        particleField.appendChild(particle);
+        window.setTimeout(() => particle.remove(), 1000);
+      }
+    }
+
+    function formatUsd(value) {
+      return new Intl.NumberFormat("fr-FR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value) + " $";
+    }
+
+    function animateCount(element, targetValue) {
+      const duration = 900;
+      const start = performance.now();
+      const from = 0;
+      function tick(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const value = from + (targetValue - from) * progress;
+        element.innerText = "Valeur estimée de l’airdrop : " + formatUsd(value);
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function spawnConfetti(intense = false) {
+      const colors = [
+        "#22d3ee",
+        "#38bdf8",
+        "#3b82f6",
+        "#60a5fa",
+        "#a5b4fc"
+      ];
+      const count = intense ? 180 : 90;
+      for (let i = 0; i < count; i += 1) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        const left = Math.random() * 100;
+        const duration = (intense ? 3 : 3.5) + Math.random() * 2.5;
+        const delay = Math.random() * 0.25;
+        const width = 6 + Math.random() * 8;
+        const height = 4 + Math.random() * 8;
+        const rotation = Math.random() * 360;
+
+        piece.style.left = `${left}vw`;
+        piece.style.setProperty("--duration", `${duration}s`);
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = `${width}px`;
+        piece.style.height = `${height}px`;
+        piece.style.transform = `translateY(-20px) rotate(${rotation}deg)`;
+        piece.style.animationDelay = `${delay}s`;
+
+        confettiField.appendChild(piece);
+        window.setTimeout(() => piece.remove(), (duration + delay + 0.2) * 1000);
+      }
+    }
+
+    function calculer(event) {
+      const inputWeeks = document.getElementById("weeks");
+      const inputPercent = document.getElementById("airdropPercent");
+      const inputFdv = document.getElementById("fdv");
+      const inputPoints = document.getElementById("points");
+
+      const A = parseNumber(inputWeeks.value);
+      const B = parseNumber(inputPercent.value);
+      const C = parseNumber(inputFdv.value);
+      const D = parseNumber(inputPoints.value);
+
+      markInvalid(inputWeeks, !A);
+      markInvalid(inputPercent, !B);
+      markInvalid(inputFdv, !C);
+      markInvalid(inputPoints, !D);
 
       if (!A || !B || !C || !D) {
-        document.getElementById("result").innerText =
-          "Merci de remplir tous les champs.";
+        setResult("Merci de remplir tous les champs.");
         return;
       }
 
       const valeur = (D * C * B / 100) / (0.8 * A);
-      document.getElementById("result").innerText =
-        "Valeur estimée de l’airdrop : " + valeur.toFixed(2) + " $";
+      setResult("Valeur estimée de l’airdrop : " + formatUsd(0));
+      const result = document.getElementById("result");
+      animateCount(result, valeur);
+
+      if (event && event.currentTarget) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        spawnParticles(x, y);
+      }
+      spawnConfetti(true);
+      if (flash) {
+        flash.classList.remove("active");
+        void flash.offsetWidth;
+        flash.classList.add("active");
+      }
+      const card = document.querySelector(".card");
+      if (card) {
+        card.classList.remove("shake");
+        void card.offsetWidth;
+        card.classList.add("shake");
+      }
     }
+
+    function reinitialiser() {
+      document.getElementById("weeks").value = "";
+      document.getElementById("airdropPercent").value = "";
+      document.getElementById("fdv").value = "";
+      document.getElementById("points").value = "";
+      document.querySelectorAll("input").forEach((input) => markInvalid(input, false));
+      setResult("");
+    }
+
+    const tokenField = document.getElementById("tokenField");
+
+    function spawnToken() {
+      const token = document.createElement("div");
+      token.className = "token";
+      const left = Math.random() * 100;
+      const drift = Math.random() * 120 - 60;
+      const duration = 6 + Math.random() * 6;
+      const scale = 0.7 + Math.random() * 0.6;
+
+      token.style.left = `${left}vw`;
+      token.style.setProperty("--drift", `${drift}px`);
+      token.style.setProperty("--duration", `${duration}s`);
+      token.style.transform = `scale(${scale})`;
+
+      tokenField.appendChild(token);
+
+      window.setTimeout(() => {
+        token.remove();
+      }, (duration + 1) * 1000);
+    }
+
+    window.setInterval(spawnToken, 350);
+
+    document.querySelectorAll("input").forEach((input) => {
+      input.addEventListener("focus", () => document.body.classList.add("focus-dim"));
+      input.addEventListener("blur", () => document.body.classList.remove("focus-dim"));
+    });
+
+    const cursorGlow = document.getElementById("cursorGlow");
+    let glowRaf = null;
+
+    function updateCursorGlow(event) {
+      if (glowRaf) cancelAnimationFrame(glowRaf);
+      glowRaf = requestAnimationFrame(() => {
+        const x = Math.round((event.clientX / window.innerWidth) * 100);
+        const y = Math.round((event.clientY / window.innerHeight) * 100);
+        cursorGlow.style.setProperty("--mx", `${x}%`);
+        cursorGlow.style.setProperty("--my", `${y}%`);
+      });
+    }
+
+    window.addEventListener("mousemove", updateCursorGlow);
+    window.addEventListener("touchmove", (event) => {
+      if (event.touches && event.touches[0]) {
+        updateCursorGlow(event.touches[0]);
+      }
+    });
+
+    const flyerField = document.getElementById("flyerField");
+
+    function spawnFlyer() {
+      const flyer = document.createElement("div");
+      flyer.className = "flyer";
+      const duration = 6 + Math.random() * 4;
+      const offset = Math.random() * 40 - 20;
+      const top = 10 + Math.random() * 30;
+
+      flyer.style.top = `${top}%`;
+      flyer.style.setProperty("--duration", `${duration}s`);
+      flyer.style.setProperty("--offset", `${offset}px`);
+
+      flyerField.appendChild(flyer);
+      window.setTimeout(() => flyer.remove(), (duration + 1) * 1000);
+    }
+
+    window.setInterval(spawnFlyer, 7000);
   </script>
+  </div>
 </body>
 </html>
