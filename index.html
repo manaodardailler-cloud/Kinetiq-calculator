@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calculateur Points Kinetiq</title>
+  <title>Kinetiq Points Calculator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -519,6 +519,24 @@
     box-shadow: 0 12px 28px rgba(34, 211, 238, 0.28);
   }
 
+  .analyze-pulse {
+    animation: analyze-pulse 0.55s ease;
+  }
+
+  @keyframes analyze-pulse {
+    0% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-1px) scale(1.02); box-shadow: 0 10px 26px rgba(34, 211, 238, 0.35); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  .pnl-negative {
+    color: #f87171;
+  }
+
+  .pnl-positive {
+    color: #34d399;
+  }
+
   .ghost {
     background: rgba(15, 23, 42, 0.7);
     color: var(--text);
@@ -563,10 +581,16 @@
 
   .focus-dim .bg-orbs,
   .focus-dim .token-field,
-  .focus-dim .noise {
-    filter: saturate(0.75) brightness(0.85);
-    opacity: 0.7;
+  .focus-dim .noise,
+  .focus-dim .waves,
+  .focus-dim .flyer-field {
+    filter: blur(2px) saturate(0.7) brightness(0.8);
+    opacity: 0.55;
     transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  .focus-dim .card {
+    backdrop-filter: blur(28px);
   }
 
   .particle-field {
@@ -738,45 +762,15 @@
 <div class="confetti-field" id="confettiField" aria-hidden="true"></div>
 <div class="flash" id="flash" aria-hidden="true"></div>
 <div class="layout">
-  <div class="side-panel">
-    <aside class="leaderboard panel">
-      <h3>Classement Kpoints</h3>
-      <div class="podium" id="podium"></div>
-      <div id="leaderboardList"></div>
-      <div class="actions">
-        <button type="button" class="ghost" id="saveLeaderboard">Enregistrer</button>
-      </div>
-    </aside>
-
-    <section class="break-even panel">
-      <h3>Seuil de rentabilité</h3>
-      <div class="field" style="margin-top: 0;">
-        <label for="fees">Frais dépensés ($)</label>
-        <input type="number" id="fees" inputmode="decimal" placeholder="250">
-      </div>
-
-      <div class="field">
-        <label for="pointsBreak">Nombre de points</label>
-        <input type="number" id="pointsBreak" inputmode="decimal" placeholder="50000">
-      </div>
-
-      <div class="actions">
-        <button type="button" onclick="calculerRentabilite()">Calculer seuil</button>
-      </div>
-
-      <div class="result" id="breakEvenResult" aria-live="polite"></div>
-    </section>
-  </div>
-
   <div class="card">
   <div class="title">
     <div class="title-badge">KQ</div>
-    <h2>Calculateur de valeur Kinetiq</h2>
+    <h2>Kinetiq Value Calculator</h2>
   </div>
-  <p class="subtitle">Estime la valeur de ton airdrop en 10 secondes.</p>
+  <p class="subtitle">Estimate your airdrop value in 10 seconds.</p>
 
   <div class="field">
-    <label for="weeks">Nombre de semaines</label>
+    <label for="weeks">Number of Weeks</label>
     <input type="number" id="weeks" inputmode="numeric" placeholder="12">
     <div class="range-row">
       <input type="range" id="weeksRange" min="14" max="32" step="1" value="14">
@@ -785,7 +779,7 @@
   </div>
 
   <div class="field">
-    <label for="airdropPercent">Pourcentage d’airdrop</label>
+    <label for="airdropPercent">Airdrop Percentage</label>
     <input type="number" id="airdropPercent" inputmode="decimal" placeholder="5">
     <div class="range-row">
       <input type="range" id="airdropRange" min="5" max="20" step="0.5" value="5">
@@ -794,7 +788,7 @@
   </div>
 
   <div class="field">
-    <label for="fdv">FDV à l’airdrop (en millions)</label>
+    <label for="fdv">FDV at Airdrop (in millions)</label>
     <input type="number" id="fdv" inputmode="decimal" placeholder="150">
     <div class="range-row">
       <input type="range" id="fdvRange" min="50" max="500" step="10" value="150">
@@ -803,7 +797,7 @@
   </div>
 
   <div class="field">
-    <label for="points">Nombre de points</label>
+    <label for="points">Number of Points</label>
     <input type="number" id="points" inputmode="decimal" placeholder="30000">
     <div class="range-row">
       <input type="range" id="pointsRange" min="0" max="20000" step="100" value="0">
@@ -812,8 +806,8 @@
   </div>
 
   <div class="actions">
-    <button type="button" onclick="calculer(event)">Calculer</button>
-    <button type="button" class="ghost" onclick="reinitialiser()">Réinitialiser</button>
+    <button type="button" onclick="calculer(event)">Calculate</button>
+    <button type="button" class="ghost" onclick="reinitialiser()">Reset</button>
   </div>
 
   <div class="result" id="result" aria-live="polite"></div>
@@ -875,101 +869,23 @@
       setValue(rangeInput.value);
     }
 
-    const particleField = document.getElementById("particleField");
-    const confettiField = document.getElementById("confettiField");
-    const flash = document.getElementById("flash");
-    const podium = document.getElementById("podium");
-    const leaderboardList = document.getElementById("leaderboardList");
+    let particleField = null;
+    let confettiField = null;
+    let flash = null;
+    let tradeCsv = null;
+    let analyzeTrades = null;
+    let tradeCsvResult = null;
+    let tradeStartMonth = null;
+    let tradeStartDay = null;
+    let tradeEndMonth = null;
+    let tradeEndDay = null;
+    let cursorGlow = null;
+    let tokenField = null;
+    let flyerField = null;
 
-    const participants = [
-      { name: "zark", points: 1200 },
-      { name: "noob to mil", points: 6000 },
-      { name: "brokx", points: 7000 },
-      { name: "farodo", points: 1200 }
-    ];
-
-    const rowMap = new Map();
-    const saveLeaderboard = document.getElementById("saveLeaderboard");
-
-    bindRangePair("weeks", "weeksRange", "weeksRangeValue");
-    bindRangePair("airdropPercent", "airdropRange", "airdropRangeValue");
-    bindRangePair("fdv", "fdvRange", "fdvRangeValue");
-    bindRangePair("points", "pointsRange", "pointsRangeValue");
-
-    function updatePodium(sorted) {
-      podium.innerHTML = "";
-      const podiumOrder = [
-        { rank: 2, className: "second" },
-        { rank: 1, className: "first" },
-        { rank: 3, className: "third" }
-      ];
-      const podiumIcons = {
-        1: "🏆",
-        2: "🥈",
-        3: "🥉"
-      };
-
-      podiumOrder.forEach((slot) => {
-        const person = sorted[slot.rank - 1];
-        const card = document.createElement("div");
-        card.className = `podium-slot ${slot.className}`;
-        card.innerHTML = `
-          <div class="rank">${podiumIcons[slot.rank]} #${slot.rank}</div>
-          <div class="name">${person ? person.name : "-"}</div>
-          <div class="score">${person ? person.points : 0} KP</div>
-        `;
-        podium.appendChild(card);
-      });
-    }
-
-    function buildLeaderboard() {
-      participants.forEach((person) => {
-        const row = document.createElement("div");
-        row.className = "leaderboard-item";
-        row.innerHTML = `
-          <div class="rank-badge">-</div>
-          <div class="leaderboard-name">${person.name}</div>
-          <input type="number" value="${person.points}" inputmode="numeric" data-name="${person.name}">
-        `;
-        rowMap.set(person.name, row);
-        leaderboardList.appendChild(row);
-      });
-    }
-
-    function updateLeaderboardView(activeInput = null) {
-      const sorted = [...participants].sort((a, b) => b.points - a.points);
-      updatePodium(sorted);
-
-      const listIcons = ["🏆", "🥈", "🥉"];
-      sorted.forEach((person, index) => {
-        const row = rowMap.get(person.name);
-        if (!row) return;
-        const badge = row.querySelector(".rank-badge");
-        if (badge) badge.textContent = listIcons[index] || String(index + 1);
-        const input = row.querySelector("input");
-        if (input && input !== activeInput) input.value = person.points;
-        leaderboardList.appendChild(row);
-      });
-    }
-
-    buildLeaderboard();
-    updateLeaderboardView();
-
-    function applyLeaderboardChanges() {
-      rowMap.forEach((row, name) => {
-        const input = row.querySelector("input");
-        const value = parseNumber(input ? input.value : "");
-        const participant = participants.find((p) => p.name === name);
-        if (participant) participant.points = Number.isFinite(value) ? value : participant.points;
-      });
-      updateLeaderboardView();
-    }
-
-    saveLeaderboard.addEventListener("click", () => {
-      applyLeaderboardChanges();
-    });
 
     function spawnParticles(x, y) {
+      if (!particleField) return;
       for (let i = 0; i < 22; i += 1) {
         const particle = document.createElement("div");
         particle.className = "particle";
@@ -1000,13 +916,14 @@
       function tick(now) {
         const progress = Math.min((now - start) / duration, 1);
         const value = from + (targetValue - from) * progress;
-        element.innerText = "Valeur estimée de l’airdrop : " + formatUsd(value);
+        element.innerText = "Estimated airdrop value: " + formatUsd(value);
         if (progress < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
     }
 
     function spawnConfetti(intense = false) {
+      if (!confettiField) return;
       const colors = [
         "#22d3ee",
         "#38bdf8",
@@ -1055,12 +972,12 @@
       markInvalid(inputPoints, !D);
 
       if (!A || !B || !C || !D) {
-        setResult("Merci de remplir tous les champs.");
+        setResult("Please fill in all fields.");
         return;
       }
 
       const valeur = (D * C * B / 100) / (0.8 * A);
-      setResult("Valeur estimée de l’airdrop : " + formatUsd(0));
+      setResult("Estimated airdrop value: " + formatUsd(0));
       const result = document.getElementById("result");
       animateCount(result, valeur);
 
@@ -1095,13 +1012,13 @@
 
       const result = document.getElementById("breakEvenResult");
       if (!fees || !points) {
-        result.innerText = "Merci de remplir les deux champs.";
+        result.innerText = "Please fill in both fields.";
         result.classList.add("visible");
         return;
       }
 
       const valuePerPoint = fees / points;
-      result.innerText = "Valeur minimale d’un point : " + formatUsd(valuePerPoint);
+      result.innerText = "Minimum value per point: " + formatUsd(valuePerPoint);
       result.classList.add("visible");
     }
 
@@ -1114,9 +1031,214 @@
       setResult("");
     }
 
-    const tokenField = document.getElementById("tokenField");
+    function parseCsv(text) {
+      const rows = [];
+      const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
+      if (!lines.length) return rows;
+      const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+      const headers = lines[0].split(delimiter).map((h) => h.trim().toLowerCase());
+      for (let i = 1; i < lines.length; i += 1) {
+        const cols = lines[i].split(delimiter);
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h] = (cols[idx] || "").trim();
+        });
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    function pickColumn(row, keys) {
+      for (const key of keys) {
+        if (key in row) return row[key];
+      }
+      return "";
+    }
+
+    function parseNumberLoose(value) {
+      if (value === null || value === undefined) return 0;
+      const raw = String(value).trim();
+      const normalized = raw.replace(/\(([^)]+)\)/g, "-$1");
+      const cleaned = normalized.replace(/[^0-9,.\-]/g, "").replace(",", ".");
+      const num = parseFloat(cleaned);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    const kinetiqPairs = new Set([
+      "US500",
+      "TSLA",
+      "GOLD",
+      "USTECH",
+      "SILVER",
+      "GOOGL",
+      "SMALL2000",
+      "AAPL",
+      "USENERGY",
+      "USBOND",
+      "BABA",
+      "USOIL",
+      "EUR",
+      "SEMI",
+      "GLDMINE"
+    ]);
+
+    function normalizeToken(token) {
+      return String(token || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    }
+
+    function tokenHasPair(token) {
+      const norm = normalizeToken(token);
+      if (!norm) return false;
+      for (const pair of kinetiqPairs) {
+        if (norm === pair) return true;
+        if (norm.startsWith(pair)) return true;
+        if (norm.includes(pair)) return true;
+      }
+      return false;
+    }
+
+    function rowHasKinetiqPair(row) {
+      const pairRaw = pickColumn(row, [
+        "pair",
+        "symbol",
+        "market",
+        "instrument",
+        "product",
+        "instrument_id",
+        "market_id",
+        "coin"
+      ]);
+      if (tokenHasPair(pairRaw)) return true;
+
+      const text = Object.values(row)
+        .join(" ")
+        .split(/\s+/)
+        .filter(Boolean);
+      return text.some((token) => tokenHasPair(token));
+    }
+
+    function analyzeKmTrades(rows) {
+      let volumeTotal = 0;
+      let pnlTotal = 0;
+
+      rows.forEach((row) => {
+        if (!rowHasKinetiqPair(row)) return;
+
+        let volume = parseNumberLoose(
+          pickColumn(row, [
+            "ntl",
+            "notional",
+            "volume",
+            "quote_volume",
+            "amount",
+            "value",
+            "size",
+            "filled",
+            "filled_qty",
+            "executed_qty",
+            "executed_quantity",
+            "qty",
+            "quantity",
+            "sz"
+          ])
+        );
+
+        const price = parseNumberLoose(
+          pickColumn(row, ["px", "price", "avg_price", "average_price"])
+        );
+        if (price && volume && volume < 1) {
+          volume = volume * price;
+        } else if (price && !volume) {
+          const qty = parseNumberLoose(
+            pickColumn(row, ["sz", "size", "filled", "filled_qty", "executed_qty", "qty", "quantity"])
+          );
+          if (qty) volume = qty * price;
+        }
+
+        const pnl = parseNumberLoose(
+          pickColumn(row, [
+            "closedpnl",
+            "pnl",
+            "profit",
+            "realized_pnl",
+            "realized profit",
+            "realized_profit",
+            "pnl_usd",
+            "profit_usd"
+          ])
+        );
+
+        if (volume) volumeTotal += Math.abs(volume);
+        if (pnl) pnlTotal += pnl;
+      });
+
+      return { volumeTotal, pnlTotal };
+    }
+
+    function parseRowDate(row) {
+      const raw = pickColumn(row, ["time", "timestamp", "date", "datetime", "created_at"]);
+      if (!raw) return null;
+      const val = String(raw).trim();
+      if (!val) return null;
+      if (/^\d+(\.\d+)?$/.test(val)) {
+        const num = parseFloat(val);
+        const ms = num > 1e12 ? num : num > 1e10 ? num : num * 1000;
+        const d = new Date(ms);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+      const dmyMatch = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+      if (dmyMatch) {
+        const day = Number.parseInt(dmyMatch[1], 10);
+        const month = Number.parseInt(dmyMatch[2], 10);
+        const year = Number.parseInt(dmyMatch[3], 10);
+        const hour = Number.parseInt(dmyMatch[4] || "0", 10);
+        const min = Number.parseInt(dmyMatch[5] || "0", 10);
+        const sec = Number.parseInt(dmyMatch[6] || "0", 10);
+        if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+          const d = new Date(year, month - 1, day, hour, min, sec);
+          return Number.isNaN(d.getTime()) ? null : d;
+        }
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        const d = new Date(val + "T00:00:00");
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+      const parsed = Date.parse(val);
+      if (!Number.isNaN(parsed)) return new Date(parsed);
+      return null;
+    }
+
+    function getMonthDay(monthInput, dayInput) {
+      const month = Number.parseInt(monthInput || "", 10);
+      const day = Number.parseInt(dayInput || "", 10);
+      if (!month || !day || month < 1 || month > 12 || day < 1 || day > 31) return null;
+      return { month, day };
+    }
+
+    function filterRowsByDate(rows, startMd, endMd) {
+      if (!startMd && !endMd) return rows;
+      if (!startMd && !endMd) return rows;
+      const startKey = startMd ? startMd.month * 100 + startMd.day : null;
+      const endKey = endMd ? endMd.month * 100 + endMd.day : null;
+
+      return rows.filter((row) => {
+        const d = parseRowDate(row);
+        if (!d) return false;
+        const key = (d.getMonth() + 1) * 100 + d.getDate();
+        if (startKey === null && endKey !== null) return key <= endKey;
+        if (startKey !== null && endKey === null) return key >= startKey;
+        if (startKey === null || endKey === null) return true;
+        if (endKey < startKey) {
+          return key >= startKey || key <= endKey;
+        }
+        return key >= startKey && key <= endKey;
+      });
+    }
 
     function spawnToken() {
+      if (!tokenField) return;
       const token = document.createElement("div");
       token.className = "token";
       const left = Math.random() * 100;
@@ -1136,17 +1258,10 @@
       }, (duration + 1) * 1000);
     }
 
-    window.setInterval(spawnToken, 350);
-
-    document.querySelectorAll("input").forEach((input) => {
-      input.addEventListener("focus", () => document.body.classList.add("focus-dim"));
-      input.addEventListener("blur", () => document.body.classList.remove("focus-dim"));
-    });
-
-    const cursorGlow = document.getElementById("cursorGlow");
     let glowRaf = null;
 
     function updateCursorGlow(event) {
+      if (!cursorGlow) return;
       if (glowRaf) cancelAnimationFrame(glowRaf);
       glowRaf = requestAnimationFrame(() => {
         const x = Math.round((event.clientX / window.innerWidth) * 100);
@@ -1156,16 +1271,8 @@
       });
     }
 
-    window.addEventListener("mousemove", updateCursorGlow);
-    window.addEventListener("touchmove", (event) => {
-      if (event.touches && event.touches[0]) {
-        updateCursorGlow(event.touches[0]);
-      }
-    });
-
-    const flyerField = document.getElementById("flyerField");
-
     function spawnFlyer() {
+      if (!flyerField) return;
       const flyer = document.createElement("div");
       flyer.className = "flyer";
       const duration = 6 + Math.random() * 4;
@@ -1180,10 +1287,169 @@
       window.setTimeout(() => flyer.remove(), (duration + 1) * 1000);
     }
 
-    window.setInterval(spawnFlyer, 7000);
+    window.addEventListener("DOMContentLoaded", () => {
+      particleField = document.getElementById("particleField");
+      confettiField = document.getElementById("confettiField");
+      flash = document.getElementById("flash");
+      cursorGlow = document.getElementById("cursorGlow");
+      tokenField = document.getElementById("tokenField");
+      flyerField = document.getElementById("flyerField");
+      tradeCsv = document.getElementById("tradeCsv");
+      analyzeTrades = document.getElementById("analyzeTrades");
+      tradeCsvResult = document.getElementById("tradeCsvResult");
+      tradeStartMonth = document.getElementById("tradeStartMonth");
+      tradeStartDay = document.getElementById("tradeStartDay");
+      tradeEndMonth = document.getElementById("tradeEndMonth");
+      tradeEndDay = document.getElementById("tradeEndDay");
+
+      bindRangePair("weeks", "weeksRange", "weeksRangeValue");
+      bindRangePair("airdropPercent", "airdropRange", "airdropRangeValue");
+      bindRangePair("fdv", "fdvRange", "fdvRangeValue");
+      bindRangePair("points", "pointsRange", "pointsRangeValue");
+
+      window.setInterval(spawnToken, 350);
+      window.setInterval(spawnFlyer, 7000);
+
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("focus", () => document.body.classList.add("focus-dim"));
+        input.addEventListener("blur", () => document.body.classList.remove("focus-dim"));
+      });
+
+      window.addEventListener("mousemove", updateCursorGlow);
+      window.addEventListener("touchmove", (event) => {
+        if (event.touches && event.touches[0]) {
+          updateCursorGlow(event.touches[0]);
+        }
+      });
+
+      if (analyzeTrades) {
+        analyzeTrades.addEventListener("click", () => {
+          analyzeTrades.classList.remove("analyze-pulse");
+          void analyzeTrades.offsetWidth;
+          analyzeTrades.classList.add("analyze-pulse");
+          tradeCsvResult.classList.add("visible");
+          tradeCsvResult.innerText = "Analyzing…";
+          if (!tradeCsv || !tradeCsv.files || !tradeCsv.files[0]) {
+            tradeCsvResult.innerText = "Please select a .csv file first.";
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            const allRows = parseCsv(String(reader.result || ""));
+            if (!allRows.length) {
+              tradeCsvResult.innerText = "No rows found in this CSV.";
+              return;
+            }
+
+            const rows = filterRowsByDate(
+              allRows,
+              getMonthDay(
+                tradeStartMonth ? tradeStartMonth.value : "",
+                tradeStartDay ? tradeStartDay.value : ""
+              ),
+              getMonthDay(
+                tradeEndMonth ? tradeEndMonth.value : "",
+                tradeEndDay ? tradeEndDay.value : ""
+              )
+            );
+            if (!rows.length) {
+              tradeCsvResult.innerText =
+                "No rows match the selected date range. Total rows: " +
+                allRows.length +
+                ".";
+              return;
+            }
+            const { volumeTotal, pnlTotal } = analyzeKmTrades(rows);
+            const headers = Object.keys(allRows[0] || {}).filter(Boolean);
+            if (!volumeTotal && !pnlTotal) {
+              tradeCsvResult.innerText =
+                "No KM volume detected in filtered rows. Headers found: " +
+                headers.slice(0, 8).join(", ") +
+                (headers.length > 8 ? "…" : "") +
+                ".";
+              return;
+            }
+            const pnlClass = pnlTotal < 0 ? "pnl-negative" : "pnl-positive";
+            tradeCsvResult.innerHTML =
+              "KM volume total: " +
+              formatUsd(volumeTotal) +
+              " | KM PnL total: " +
+              '<span class=\"' +
+              pnlClass +
+              '\">' +
+              formatUsd(pnlTotal) +
+              "</span>";
+          tradeCsvResult.classList.add("visible");
+        };
+        reader.readAsText(tradeCsv.files[0]);
+      });
+      }
+
+      if (tradeCsv) {
+        tradeCsv.addEventListener("change", () => {
+          if (tradeCsv.files && tradeCsv.files[0]) {
+            tradeCsvResult.classList.add("visible");
+            tradeCsvResult.innerText = "File loaded. Click Analyze KM Trades.";
+          }
+        });
+      }
+    });
   </script>
   </div>
+
+  <div class="side-panel">
+    <section class="break-even panel">
+      <h3>Break-even Threshold</h3>
+      <div class="field" style="margin-top: 0;">
+        <label for="fees">Fees Spent ($)</label>
+        <input type="number" id="fees" inputmode="decimal" placeholder="250">
+      </div>
+
+      <div class="field">
+        <label for="pointsBreak">Number of Points</label>
+        <input type="number" id="pointsBreak" inputmode="decimal" placeholder="50000">
+      </div>
+
+      <div class="actions">
+        <button type="button" onclick="calculerRentabilite()">Calculate Threshold</button>
+      </div>
+
+      <div class="result" id="breakEvenResult" aria-live="polite"></div>
+
+      <div class="field" style="margin-top: 18px;">
+        <label for="tradeCsv">Trade history (.csv)</label>
+        <input type="file" id="tradeCsv" accept=".csv,text/csv">
+      </div>
+
+      <div class="field" style="margin-top: 12px;">
+        <label>Date Range (Month / Day)</label>
+        <div class="range-row" style="gap: 8px;">
+          <span class="range-value" style="min-width: 68px; text-align: left;">Start</span>
+          <input type="number" id="tradeStartMonth" placeholder="MM" min="1" max="12">
+          <input type="number" id="tradeStartDay" placeholder="DD" min="1" max="31">
+        </div>
+        <div class="range-row" style="gap: 8px; margin-top: 6px;">
+          <span class="range-value" style="min-width: 68px; text-align: left;">End</span>
+          <input type="number" id="tradeEndMonth" placeholder="MM" min="1" max="12">
+          <input type="number" id="tradeEndDay" placeholder="DD" min="1" max="31">
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top: 12px;">
+        <button type="button" class="ghost" id="analyzeTrades">Analyze KM Trades</button>
+      </div>
+      <div class="result" id="tradeCsvResult" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <section class="panel" style="width: 100%;">
+    <h3 style="margin-top: 0;">Earn More Kpoints</h3>
+    <p style="margin: 0; color: var(--muted);">
+      To earn more Kpoints, trade directly on
+      <a href="https://markets.xyz/join/brokx" target="_blank" rel="noopener noreferrer" style="color: var(--accent-2); text-decoration: none;">markets.xyz</a>.
+    </p>
+  </section>
 </div>
 </body>
 </html>
-
